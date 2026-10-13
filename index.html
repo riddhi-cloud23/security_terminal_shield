@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Terminal Shield // Credential Auditing Platform</title>
+    <!-- Tailwind CSS (via CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+        body { 
+            background: radial-gradient(circle at 10% 20%, rgba(224, 231, 255, 0.9) 0%, rgba(241, 245, 249, 1) 90%);
+            color: #0f172a; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism card aesthetic */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px -5px rgba(99, 102, 241, 0.08), 0 4px 12px -2px rgba(148, 163, 184, 0.05);
+            backdrop-filter: blur(16px);
+            transition: all 0.25s ease;
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 20px 35px -5px rgba(99, 102, 241, 0.12), 0 8px 16px -4px rgba(148, 163, 184, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Dark attack matrix container for high contrast pop */
+        .dark-matrix-card {
+            background: #0f172a;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.3);
+        }
+
+        /* Standout glowing time badges */
+        .time-badge-pop {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 0.025em;
+        }
+
+        .pop-green {
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.4);
+            box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        .pop-red {
+            color: #fb7185;
+            border-color: rgba(251, 113, 133, 0.5);
+            box-shadow: 0 0 15px rgba(251, 113, 133, 0.25);
+            background: rgba(251, 113, 133, 0.1);
+        }
+
+        .pop-amber {
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.4);
+            background: rgba(251, 191, 36, 0.1);
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="max-w-7xl mx-auto space-y-10">
+        
+        <!-- VIBRANT MODERN HEADER -->
+        <header id="mainHeader" class="glass-card flex flex-col md:flex-row justify-between items-center transition-all bg-white/90">
+            <div class="flex items-center gap-4">
+                <div id="statusDot" class="h-4 w-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-400/50"></div>
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">Security Terminal Shield</h1>
+                    <p class="text-sm font-medium text-indigo-600 mt-1">Enterprise Credential Auditing & Threat Modeling System</p>
+                </div>
+            </div>
+            <div class="mt-4 md:mt-0 text-right bg-indigo-50/80 px-5 py-2.5 rounded-2xl border border-indigo-100">
+                <p id="statusText" class="text-xs text-indigo-700 font-extrabold uppercase tracking-widest">Active Audit // SECURE</p>
+                <p class="text-[11px] text-slate-500 font-medium mt-0.5">Platform Build v2.5</p>
+            </div>
+        </header>
+
+        <!-- DASHBOARD GRID LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            <!-- LEFT COLUMN: INPUTS & GENERATOR -->
+            <div class="lg:col-span-1 space-y-8">
+                <!-- Evaluation Input -->
+                <div class="glass-card">
+                    <label class="block text-xs uppercase tracking-wider text-slate-500 mb-3 font-bold">Credential Input</label>
+                    <input type="password" id="passwordInput" placeholder="Enter password to evaluate..." 
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all mb-3 text-sm font-medium"
+                        oninput="runSecurityAudit()">
+                    <div class="flex justify-between items-center text-xs font-semibold">
+                        <span id="patternWarning" class="text-slate-400">Awaiting Input...</span>
+                        <button onclick="toggleVisibility()" id="toggleBtn" class="text-indigo-600 hover:text-indigo-500 transition-colors">Show String</button>
+                    </div>
+                </div>
+
+                <!-- Complex Key Generator -->
+                <div class="glass-card">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-xs uppercase tracking-wider text-slate-500 font-bold">Key Generator</label>
+                        <span id="lengthDisplay" class="text-xs text-indigo-600 font-extrabold">16 Chars</span>
+                    </div>
+                    <input type="range" id="lengthRange" min="12" max="32" value="16" 
+                        class="w-full accent-indigo-600 bg-slate-200 cursor-pointer mb-5 rounded-lg"
+                        oninput="document.getElementById('lengthDisplay').innerText = this.value + ' Chars'">
+                    <button onclick="generateSecurePassword()" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-lg shadow-indigo-200 active:scale-[0.98]">
+                        Generate High-Strength Key
+                    </button>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: METRICS DASHBOARD -->
+            <div class="lg:col-span-3 space-y-8">
+                
+                <!-- Core Metrics Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card">
+                        <span class="text-xs text-slate-500 block mb-2 uppercase tracking-wide font-bold">Shannon Entropy</span>
+                        <span id="entropyVal" class="text-4xl font-extrabold text-slate-900">0.00 <span class="text-xl font-medium text-slate-400">bits</span></span>
+                    </div>
+                    <div class="glass-card">
+                        <span class="text-xs text-slate-500 block mb-2 uppercase tracking-wide font-bold">HIBP Breach Leaks</span>
+                        <span id="breachVal" class="text-base font-bold text-emerald-600 block mt-2">Awaiting Analysis...</span>
+                    </div>
+                    <div class="glass-card">
+                        <span class="text-xs text-slate-500 block mb-2 uppercase tracking-wide font-bold">Human Pattern Flaw</span>
+                        <span id="patternRiskVal" class="text-base font-bold text-slate-400 block mt-2">None Detected</span>
+                    </div>
+                </div>
+
+                <!-- Verification Requirement Checklist -->
+                <div class="glass-card">
+                    <h2 class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-5 border-b border-slate-100 pb-3">Verification Checklist // Security Standards</h2>
+                    <div id="checklistGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-slate-700">
+                        <div id="check-length" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Minimum length (12+ characters)</div>
+                        <div id="check-upper" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Contains uppercase [A-Z]</div>
+                        <div id="check-lower" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Contains lowercase [a-z]</div>
+                        <div id="check-number" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Contains numeric digit [0-9]</div>
+                        <div id="check-symbol" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Contains special symbol [!@#$...]</div>
+                        <div id="check-pattern" class="flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100">❌ Zero predictable human patterns</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THREAT SIMULATION ENVIRONMENT (DARK HIGH-CONTRAST MATRIX FOR POPPING TIMES) -->
+        <div class="dark-matrix-card p-8 space-y-8">
+            <div>
+                <h2 class="text-base font-extrabold tracking-wider text-indigo-400 flex items-center gap-2">
+                    ⚡ COMPREHENSIVE THREAT SIMULATION ENVIRONMENT // ATTACK MATRIX
+                </h2>
+                <p class="text-xs text-slate-400 mt-1 leading-relaxed max-w-4xl">
+                    Simulated threat landscape demonstrating exact time-to-compromise estimates across six modern attack methodologies using standard cryptographic hardware.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 1. Automated Hash Crackers -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">🔍 Automated Hash Crackers</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">High-speed computational hash comparison against stolen offline credential files.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-hash-container"><span id="time-hash" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+
+                <!-- 2. Network Login Testers -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">🌐 Network Login Testers</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Guaranteed login attempts into live web authentication portals.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-network-container"><span id="time-network" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+
+                <!-- 3. Dictionary Attack Utilities -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">📚 Dictionary Attack Utilities</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Matches inputs against pre-compiled lists of common words, names, and years.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-dictionary-container"><span id="time-dictionary" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+
+                <!-- 4. Password Spraying -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">🛡️ Password Spraying (Online)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Stealth bulk active directory testing designed to bypass account lockouts.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-spray-container"><span id="time-spray" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+
+                <!-- 5. GPU Cloud Clusters -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">⚡ GPU Cloud Clusters</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">High-performance distributed hardware executing parallel brute-force loops.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-gpu-container"><span id="time-gpu" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+
+                <!-- 6. Rainbow Tables -->
+                <div class="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-extrabold text-indigo-300 uppercase tracking-wider">📊 Rainbow Tables</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Precomputed cryptographic database lookup files providing near-instant hash reversal.</p>
+                    <div class="pt-3 border-t border-slate-800/80 flex flex-col gap-1">
+                        <span class="text-[10px] text-slate-500 uppercase font-bold">Estimated Time:</span>
+                        <div id="time-rainbow-container"><span id="time-rainbow" class="time-badge-pop pop-amber">--</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="text-[10px] text-slate-500 pt-2 border-t border-slate-800/80 text-center">
+                Academic security auditing simulation based on industry-standard computational hardware assumptions.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function toggleVisibility() {
+            const input = document.getElementById("passwordInput");
+            const btn = document.getElementById("toggleBtn");
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerText = "Hide String";
+            } else {
+                input.type = "password";
+                btn.innerText = "Show String";
+            }
+        }
+
+        function checkPatterns(pwd) {
+            if (!pwd) return { hasPattern: false, desc: "None Detected" };
+            const lower = pwd.toLowerCase();
+            const commonWords = ["password", "admin", "welcome", "123456", "qwerty", "iloveyou", "monkey", "dragon", "riddhi", "sharma", "kumar"];
+            const commonYears = /(19\d\d|20\d\d)/;
+            const sequential = /(123|234|345|456|567|678|789|abc|bcd|cde|def)/i;
+            const repeated = /(.)\1{2,}/;
+
+            if (commonWords.some(word => lower.includes(word))) return { hasPattern: true, desc: "Contains dictionary word/name" };
+            if (commonYears.test(pwd)) return { hasPattern: true, desc: "Contains predictable year/birthday" };
+            if (sequential.test(pwd)) return { hasPattern: true, desc: "Contains sequential pattern" };
+            if (repeated.test(pwd)) return { hasPattern: true, desc: "Contains repeating characters" };
+
+            return { hasPattern: false, desc: "Secure (No Patterns)" };
+        }
+
+        function calculateEntropy(pwd) {
+            if (!pwd) return 0;
+            let pool = 0;
+            if (/[a-z]/.test(pwd)) pool += 26;
+            if (/[A-Z]/.test(pwd)) pool += 26;
+            if (/[0-9]/.test(pwd)) pool += 10;
+            if (/[^a-zA-Z0-9]/.test(pwd)) pool += 32;
+            
+            const patternCheck = checkPatterns(pwd);
+            let entropy = pwd.length * Math.log2(pool || 1);
+            if (patternCheck.hasPattern) entropy *= 0.3; // Entropy penalty
+            return parseFloat(entropy.toFixed(2));
+        }
+
+        function formatTime(seconds) {
+            if (seconds <= 0.1) return "Instantaneous (< 1 sec)";
+            if (seconds < 60) return `${seconds.toFixed(1)} Seconds`;
+            if (seconds < 3600) return `${(seconds / 60).toFixed(1)} Minutes`;
+            if (seconds < 86400) return `${(seconds / 3600).toFixed(1)} Hours`;
+            if (seconds < 31536000) return `${(seconds / 86400).toFixed(1)} Days`;
+            if (seconds < 31536000 * 1000) return `${(seconds / 31536000).toFixed(1)} Years`;
+            return "Centuries (Uncrackable)";
+        }
+
+        function generateSecurePassword() {
+            const length = parseInt(document.getElementById("lengthRange").value);
+            const lower = "abcdefghijklmnopqrstuvwxyz";
+            const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const digits = "0123456789";
+            const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+            
+            let chars = [
+                lower[Math.floor(Math.random() * lower.length)],
+                upper[Math.floor(Math.random() * upper.length)],
+                digits[Math.floor(Math.random() * digits.length)],
+                symbols[Math.floor(Math.random() * symbols.length)]
+            ];
+
+            const allPool = lower + upper + digits + symbols;
+            for (let i = 4; i < length; i++) {
+                chars.push(allPool[Math.floor(Math.random() * allPool.length)]);
+            }
+
+            chars.sort(() => Math.random() - 0.5);
+            document.getElementById("passwordInput").value = chars.join("");
+            runSecurityAudit();
+        }
+
+        async function checkBreach(pwd) {
+            const breachEl = document.getElementById("breachVal");
+            if (!pwd) {
+                breachEl.innerText = "Awaiting Analysis...";
+                breachEl.className = "text-base font-bold text-slate-400 block mt-2";
+                return;
+            }
+
+            const msgBuffer = new TextEncoder().encode(pwd);
+            const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+            
+            const prefix = hashHex.slice(0, 5);
+            const suffix = hashHex.slice(5);
+
+            try {
+                const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                let foundCount = 0;
+                for (let line of lines) {
+                    const [hashSuffix, count] = line.split(':');
+                    if (hashSuffix.trim() === suffix) {
+                        foundCount = parseInt(count.trim());
+                        break;
+                    }
+                }
+
+                if (foundCount > 0) {
+                    breachEl.innerText = `⚠️ COMPROMISED (${foundCount.toLocaleString()} times)`;
+                    breachEl.className = "text-base font-bold text-rose-500 block mt-2 animate-pulse";
+                    triggerAlertState(true);
+                } else {
+                    breachEl.innerText = "✔️ Safe (0 Leaks Found)";
+                    breachEl.className = "text-base font-bold text-emerald-600 block mt-2";
+                }
+            } catch (err) {
+                breachEl.innerText = "HIBP Secure Offline Mode";
+            }
+        }
+
+        function triggerAlertState(isAlert) {
+            const header = document.getElementById("mainHeader");
+            const dot = document.getElementById("statusDot");
+            const text = document.getElementById("statusText");
+
+            if (isAlert) {
+                header.className = "glass-card flex flex-col md:flex-row justify-between items-center transition-all bg-rose-50/90 !border-rose-200";
+                dot.className = "h-4 w-4 rounded-full bg-rose-500 shadow-lg shadow-rose-400/50 animate-ping";
+                text.className = "text-xs text-rose-600 font-extrabold uppercase tracking-widest";
+                text.innerText = "Analysis Alert // VULNERABLE CREDENTIAL";
+            } else {
+                header.className = "glass-card flex flex-col md:flex-row justify-between items-center transition-all bg-white/90";
+                dot.className = "h-4 w-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-400/50";
+                text.className = "text-xs text-indigo-700 font-extrabold uppercase tracking-widest";
+                text.innerText = "Active Audit // SECURE";
+            }
+        }
+
+        function runSecurityAudit() {
+            const pwd = document.getElementById("passwordInput").value;
+            if (!pwd) {
+                document.getElementById("entropyVal").innerHTML = `0.00 <span class="text-xl font-medium text-slate-400">bits</span>`;
+                resetTimeBadge("time-hash");
+                resetTimeBadge("time-network");
+                resetTimeBadge("time-dictionary");
+                resetTimeBadge("time-spray");
+                resetTimeBadge("time-gpu");
+                resetTimeBadge("time-rainbow");
+                document.getElementById("patternRiskVal").innerText = "None Detected";
+                triggerAlertState(false);
+                return;
+            }
+
+            const entropy = calculateEntropy(pwd);
+            const patternData = checkPatterns(pwd);
+
+            document.getElementById("entropyVal").innerHTML = `${entropy} <span class="text-xl font-medium text-slate-400">bits</span>`;
+            
+            const riskEl = document.getElementById("patternRiskVal");
+            riskEl.innerText = patternData.desc;
+            
+            const isWeak = entropy < 50 || patternData.hasPattern || pwd.length < 10;
+            riskEl.className = isWeak ? "text-base font-bold text-rose-500 block mt-2" : "text-base font-bold text-emerald-600 block mt-2";
+            
+            triggerAlertState(isWeak);
+
+            const combinations = Math.pow(2, entropy);
+
+            // Time Calculations & Bright Glowing Badges
+            updateTimeBadge("time-hash", combinations / 10_000_000_000, 3600);
+            updateTimeBadge("time-network", combinations / 5, 86400);
+            updateTimeBadge("time-dictionary", patternData.hasPattern ? 0.05 : (combinations / 1_000_000_000), 3600);
+            updateTimeBadge("time-spray", patternData.hasPattern ? 2 : (combinations / 2), 86400);
+            updateTimeBadge("time-gpu", combinations / 100_000_000_000, 3600);
+            
+            const rainbowEl = document.getElementById("time-rainbow");
+            if (pwd.length <= 8 || patternData.hasPattern) {
+                rainbowEl.innerText = "Instantaneous Match (< 0.1s)";
+                rainbowEl.className = "time-badge-pop pop-red animate-pulse";
+            } else {
+                rainbowEl.innerText = "Table Lookup Ineffective";
+                rainbowEl.className = "time-badge-pop pop-green";
+            }
+
+            updateCheck("check-length", pwd.length >= 12, "Minimum length (12+ characters)");
+            updateCheck("check-upper", /[A-Z]/.test(pwd), "Contains uppercase [A-Z]");
+            updateCheck("check-lower", /[a-z]/.test(pwd), "Contains lowercase [a-z]");
+            updateCheck("check-number", /[0-9]/.test(pwd), "Contains numeric digit [0-9]");
+            updateCheck("check-symbol", /[^a-zA-Z0-9]/.test(pwd), "Contains special symbol [!@#$...]");
+            updateCheck("check-pattern", !patternData.hasPattern, "Zero predictable human patterns");
+
+            checkBreach(pwd);
+        }
+
+        function updateTimeBadge(elementId, seconds, redThresholdSec) {
+            const el = document.getElementById(elementId);
+            const timeStr = formatTime(seconds);
+            el.innerText = timeStr;
+
+            if (seconds < redThresholdSec) {
+                el.className = "time-badge-pop pop-red animate-pulse";
+            } else if (seconds > 31536000) {
+                el.className = "time-badge-pop pop-green";
+            } else {
+                el.className = "time-badge-pop pop-amber";
+            }
+        }
+
+        function resetTimeBadge(elementId) {
+            const el = document.getElementById(elementId);
+            el.innerText = "--";
+            el.className = "time-badge-pop pop-amber";
+        }
+
+        function updateCheck(elementId, condition, text) {
+            const el = document.getElementById(elementId);
+            if (condition) {
+                el.innerHTML = `<span class="text-base text-emerald-500">✔️</span> ${text}`;
+                el.className = "flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-slate-800";
+            } else {
+                el.innerHTML = `<span class="text-base text-slate-300">❌</span> ${text}`;
+                el.className = "flex items-center gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-slate-400";
+            }
+        }
+    </script>
+</body>
+</html>
